@@ -785,19 +785,6 @@ CREATE TABLE `tdo_system_notifications` (
 
 
 
-# Dump of table tdo_taskids_map		
-# ------------------------------------------------------------		
-DROP TABLE IF EXISTS `tdo_taskids_map`;		
-CREATE TABLE `tdo_taskids_map` (		
-  `taskid` VARCHAR(36) NOT NULL, 		
-  `userid` VARCHAR(36) NOT NULL, 		
-  `newid` VARCHAR(36) NOT NULL, 		
-  KEY `tdo_taskids_map_pk`(`taskid`(10)), 		
-  INDEX `tdo_taskids_map_idx`(`taskid`(10),`userid`(10))		
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-
-
 # Dump of table tdo_system_settings
 # ------------------------------------------------------------
 
@@ -825,8 +812,7 @@ VALUES
 	('SYSTEM_SETTING_SUBSCRIPTION_MONTHLY_DATE_INTERVAL','PT5M'),
 	('SYSTEM_SETTING_SUBSCRIPTION_YEARLY_DATE_INTERVAL','PT10M'),
 	('SYSTEM_SETTING_SUBSCRIPTION_TRIAL_DATE_INTERVAL', 'PT5M'),
-	('SYSTEM_SETTING_TEAM_GRANDFATHER_DATE', '2015-09-30T23:23:59-06:00'),
-  ('SYSTEM_SETTING_TODOCLOUD_GRANDFATHER_DATE', '2019-02-01T23:59:59+00:00');
+	('SYSTEM_SETTING_TEAM_GRANDFATHER_DATE', '2015-09-30T23:23:59-06:00');
 
 /*!40000 ALTER TABLE `tdo_system_settings` ENABLE KEYS */;
 UNLOCK TABLES;
@@ -1125,11 +1111,14 @@ CREATE TABLE IF NOT EXISTS `tdo_meta_data` (
   `finishing` int(10) DEFAULT NULL,
   `how_familiar_system` enum('not_at_all','somewhat_familiar','familiar','very_familiar') DEFAULT NULL,
   `plan_type` enum('after_work','begin_work','end_work','before_sleep') DEFAULT NULL,
-  `plan_date` varchar(36) DEFAULT NULL,
+  `plan_date` varchar(60) DEFAULT NULL,
   `plan_time` int(11) NOT NULL DEFAULT '0',
-  `plan_alert` int(10) DEFAULT NULL,
-  KEY `meta_data_pk` (`userid`(10))
+  `plan_alert` int(10) DEFAULT '0',
+  `assessment_reminder` varchar(255) NOT NULL,
+  `benchmark_group` varchar(255) NOT NULL,
+  KEY `tdo_meta_data_pk` (`userid`(10))
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
 
 
 # Dump of table tdo_team_integration_slack
@@ -1179,7 +1168,6 @@ CREATE TABLE `tdo_user_devices` (
   `appid` varchar(80) NOT NULL,
   `appversion` varchar(36) NOT NULL,
   `timestamp` int(11) NOT NULL DEFAULT '0',
-  `timestamp_upgraded` int(11) DEFAULT NULL,
   `error_number` int(11) NOT NULL DEFAULT '0',
   `error_message` text,
   KEY `tdo_user_devices_deviceid` (`user_deviceid`(10)),
@@ -1255,10 +1243,13 @@ CREATE TABLE `tdo_user_referrals` (
   KEY `tdo_user_referrals_code` (`referral_code`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-# Dump of table tdo_benchmark
+# Dump of table tdo_benchmarks
 # ------------------------------------------------------------
-CREATE TABLE IF NOT EXISTS `tdo_benchmark` (
-  `benchmark_id` int(11) NOT NULL AUTO_INCREMENT,
+
+DROP TABLE IF EXISTS `tdo_benchmarks`;
+
+CREATE TABLE `tdo_benchmarks` (
+  `benchmark_id` varchar(255) NOT NULL,
   `benchmark_date` datetime NOT NULL,
   `bench_metakey` varchar(255) NOT NULL,
   `total_logins` int(11) NOT NULL,
@@ -1266,75 +1257,52 @@ CREATE TABLE IF NOT EXISTS `tdo_benchmark` (
   `task_created` int(11) NOT NULL,
   `task_completed` int(11) NOT NULL,
   `activity_count` int(11) NOT NULL,
-  PRIMARY KEY (`benchmark_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+  KEY `ind_benchmark_date` (`benchmark_date`),
+  KEY `ind_bench_metakey` (`bench_metakey`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-# Dump of table tdo_activity
+# Dump of table tdo_activities
 # ------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `tdo_activity` (
-  `activity_id` int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `tdo_activities`;
+
+CREATE TABLE `tdo_activities` (
+  `activity_id` varchar(255) NOT NULL,
   `userid` varchar(255) NOT NULL,
   `date_time` datetime NOT NULL,
   `activity_type` varchar(255) NOT NULL,
-  PRIMARY KEY (`activity_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=14 DEFAULT CHARSET=latin1;
+  KEY `ind_activity_type` (`activity_type`),
+  KEY `ind_userid` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-# Dump of table productivity_assessment
+# Dump of table tdo_productivity_assessments
 # ------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `productivity_assessment` (
-  `auto_id` int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `tdo_productivity_assessments`;
+
+CREATE TABLE `tdo_productivity_assessments` (
+  `auto_id` varchar(255) NOT NULL,
   `satisfied_value` int(11) NOT NULL,
   `date_time` datetime NOT NULL,
   `what_has_well` text NOT NULL,
   `need_to_improve` text NOT NULL,
   `timestamp` int(11) NOT NULL,
   `user_id` varchar(255) NOT NULL,
-  PRIMARY KEY (`auto_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=latin1;
-
-# Dump of table user_benchmark_category
-# ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `user_benchmark_category` (
-  `auto_id` int(11) NOT NULL AUTO_INCREMENT,
-  `userid` varchar(255) NOT NULL,
-  `benchmark_category` varchar(255) NOT NULL,
-  PRIMARY KEY (`auto_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=4 DEFAULT CHARSET=latin1;
-
-
-# Dump of table tdo_productivity_assessment_reminder
-# ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `tdo_productivity_assessment_reminder` (
-  `auto_id` int(11) NOT NULL AUTO_INCREMENT,
-  `userid` varchar(255) NOT NULL,
-  `frequency` varchar(255) NOT NULL,
-  PRIMARY KEY (`auto_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
-
-# Dump of table tdo_login_log
-# ------------------------------------------------------------
-
-CREATE TABLE IF NOT EXISTS `tdo_login_log` (
-  `log_id` int(11) NOT NULL AUTO_INCREMENT,
-  `userid` varchar(255) NOT NULL,
-  `date_time` datetime NOT NULL,
-  `logout_time` datetime NOT NULL,
-  PRIMARY KEY (`log_id`)
+  KEY `ind_userid` (`user_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-# Dump of table tdo_benchmark_group
+
+# Dump of table tdo_user_benchmark_categories
 # ------------------------------------------------------------
 
-CREATE TABLE IF NOT EXISTS `tdo_benchmark_group` (
-  `auto_id` int(11) NOT NULL AUTO_INCREMENT,
+DROP TABLE IF EXISTS `tdo_user_benchmark_categories`;
+
+CREATE TABLE `tdo_user_benchmark_categories` (
+  `auto_id` varchar(255) NOT NULL,
   `userid` varchar(255) NOT NULL,
-  `benchmark_group` varchar(255) NOT NULL,
-  PRIMARY KEY (`auto_id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=latin1;
+  `benchmark_category` varchar(255) NOT NULL,
+  KEY `ind_userid` (`userid`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 ALTER TABLE `tdo_tags` ADD `userid` VARCHAR(255) NOT NULL AFTER `name`;
 
